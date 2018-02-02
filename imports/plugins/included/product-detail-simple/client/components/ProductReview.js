@@ -8,37 +8,38 @@ import { Card, CardHeader, CardBody, ReactionAvatar } from "/imports/plugins/cor
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
 
 class ProductReview extends Component {
-  static PropTypes = {
-    reviews: PropTypes.arrayOf(PropTypes.any);
+  static propTypes = {
+    reviews: PropTypes.arrayOf(PropTypes.any)
   };
   constructor(props) {
+    super(props);
     this.state = {
       review: "",
       rating: 0,
       user: Meteor.user()
     };
-  };
-
+  }
   createReview = () => {
+    // eslint-disable-next-line
     const thisComponent = this;
     if (this.state.rating === 0) {
-      Alerts.toast("You need to provide a rating for your review", "error");
+      Alerts.toast("Please add a rating to your review.", "error");
       return;
-    };
-    Meteor.call("ProductReview/createReview", ReactionProduct.selectedProductId(), this.state.review, this.state.rating, (error) => {
+    }
+    Meteor.call("productReview/createReview", ReactionProduct.selectedProductId(), this.state.review, this.state.rating, function (error) {
       if (error) {
+        // Alert to the user that something went wrong.
         Alerts.toast(error.reason, "error");
       } else {
         thisComponent.setState({ review: "", rating: 0 });
-
-        Alerts.toast("Product Review Successful!", "success");
+        //  Alert to the user that the review was created.
+        Alerts.toast("Review published !", "success");
       }
     });
-  };
-
+  }
   render() {
     const { reviews } = this.props;
-    const totalReviews = reviews.map(review => (
+    const reviewList = reviews.map(review => (
       <div className="media" key={review._id}>
         <div className="media-left" style={{ paddingRight: "39px" }}>
           <ReactionAvatar
@@ -51,12 +52,8 @@ class ProductReview extends Component {
           />
         </div>
         <div className="media-body">
-          <h4 className="media-hearing" style={{ marginBottom: "12px" }}>
-            <ReactStars
-              edit={false}
-              onChange={rating => { this.setState({ rating }); }}
-              count={5}
-              size={18}
+          <h4 className="media-heading" style={{ marginBottom: "12px" }}>
+            <ReactStars edit={false} onChange={rating => { this.setState({ rating }); }} count={5} size={18}
               value={review.rating}
             />
           </h4>
@@ -69,9 +66,11 @@ class ProductReview extends Component {
     return (
       <div style={{ marginTop: "10px" }}>
         <Card>
-          <CardHeader i18nKeyTitle={"Product reviews"} title={"Product reviews"}>
-            <CardBody>
-              {this.state.user.emails.length > 0 &&
+          <CardHeader i18nKeyTitle={"Product reviews"} title={"Product reviews"} />
+          <CardBody>
+            {
+              this.state.user.emails.length > 0 &&
+
               <div className="row" style={{ padding: "5px" }}>
                 <div className="media">
                   <div className="media-left" style={{ paddingRight: "39px" }}>
@@ -85,15 +84,10 @@ class ProductReview extends Component {
                     />
                   </div>
                   <div className="media-body">
-                    <h4 className="media-hearing" style={{ marginBottom: "12px" }}>
-                      <ReactStars
-                        onChange={rating => this.setState({ rating });}
-                        count={5}
-                        size={18}
-                        value={this.state.rating}
-                      />
+                    <h4 className="media-heading" style={{ marginBottom: "12px" }}>
+                      <ReactStars onChange={rating => { this.setState({ rating }); }} count={5} size={18} value={this.state.rating} />
                     </h4>
-                    <textarea style={{ border: "2px solid #5cde86", boxShadow: "none", marginBottom: "4px" }} placeholder="Provide a review for this product...." cols="2" rows="2"
+                    <textarea style={{ border: "2px solid #5cde86", boxShadow: "none", marginBottom: "4px" }} placeholder="Leave a review ..." cols="2" rows="2"
                       className="form-control"
                       value={this.state.review}
                       name="review"
@@ -101,36 +95,35 @@ class ProductReview extends Component {
                     />
                     <div className="add-to-cart">
                       <button
-                      className="btn pull-right"
-                      onClick={this.createReview}
-                      disabled={this.state.review.length < 8}
-                      style={{ backgroundColor: "#5cde86", borderRadius: "0 2px 2px 0", color: "#ffffff" }}
+                        className="btn pull-right"
+                        onClick={this.createReview}
+                        disabled={this.state.review.length < 8}
+                        style={{ backgroundColor: "#5cde86", borderRadius: "0 2px 2px 0", color: "#ffffff" }}
                       >Submit review</button>
                     </div>
                   </div>
                 </div>
               </div>
-              }
-              {
+            }
+            {
               this.state.user.emails.length < 1 &&
-              <p className="text-center">You need to be signed in to provide a review.</p>
+              <p className="text-center">Please sign in to add a review</p>
             }
             <div className="review-container" style={{ overflowY: "auto", height: "350px" }}>
               {reviewList}
             </div>
-            </CardBody>
-          </CardHeader>
+          </CardBody>
         </Card>
       </div>
     );
   }
-};
+}
 
-const composer = (props, productData) => {
-  onData(null, {
+function composer(props, productData) {
+  productData(null, {
     reviews: ProductReviews.find({ productId: ReactionProduct.selectedProductId() }, { sort: { createdAt: -1 }, limit: 20 }).fetch()
   });
-};
+}
 
 registerComponent("ProductReview", ProductReview);
 

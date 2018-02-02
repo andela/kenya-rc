@@ -13,7 +13,8 @@ class ProductRating extends Component {
     const { reviews } = this.props;
     const totalRatings = reviews.map(review => review.rating)
       .reduce((total, rating) => total + rating, 0);
-    const productAverageRating = Math.floor((totalRatings / reviews.length) * 100) / 100;
+    const reviewCount = reviews.length;
+    const productAverageRating = reviewCount ? Math.floor((totalRatings / reviewCount) * 100) / 100 : 0;
     return (
       <div className="text-center">
         <h1 className="text-center">
@@ -28,7 +29,7 @@ class ProductRating extends Component {
 const composer = (props, productData) => {
   productData(null, {
     reviews: ProductReviews.find({
-      productId: ReactionProduct.selectedProduct()
+      productId: ReactionProduct.selectedProductId()
     }, {
       sort: {
         createdAt: -1
