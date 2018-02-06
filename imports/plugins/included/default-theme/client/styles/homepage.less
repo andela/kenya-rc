@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:100,300i,400,700'); 
  
-.fashionStatement { 
+.product-section{
+  background-color: #f6f6f6
+}
+
+.fashion-statement { 
   background-image: url('/resources/images/homepage/img1.webp'); 
   background-size: cover;  
   background-position: 50px auto;  
@@ -22,7 +26,7 @@
   z-index: 999; 
 } 
  
-.fashionStatement .statement{ 
+.fashion-statement .statement{ 
   display: block; 
   margin: 200px auto 0; 
   position: absolute; 
@@ -30,7 +34,7 @@
   width: 100%; 
 } 
 
-.fashionStatement .statement .shopping { 
+.fashion-statement .statement .shopping { 
   background: white; 
   padding-top: 10px; 
   padding-bottom: 10px; 
@@ -94,28 +98,28 @@
   height: 100%; 
   width: 100%; 
   background: black; 
-  opacity: 0.2 !important; 
+  opacity: 0.2;
   overflow: hidden; 
   z-index: 49; 
 } 
- 
-.category-overlay-top { 
-  display: block; 
-  position: absolute; 
-  height: 100%; 
-  width: 100%; 
-  overflow: hidden; 
-  z-index: 50; 
-} 
- 
-.category-overlay-top button { 
-  display: block; 
-  text-align: center; 
-  font-size: 25px; 
-  color: white; 
-  margin: 80px auto 0; 
-  background: none; 
-  border: none; 
+
+.category-overlay-top {
+  display: block;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.category-overlay-top button {
+  display: block;
+  text-align: center;
+  font-size: 25px;
+  color: white;
+  margin: 80px auto 0;
+  background: none;
+  border: none;
 }
 
 .category-div img { 
@@ -130,9 +134,19 @@
  
  
 .about-text { 
-  padding-top: 50px !important; 
-  color: black !important;  
+  padding-top: 50px; 
+  color: black;  
 } 
+
+.about-desc {
+  text-align: center;
+  line-height: 2.5em;
+  width: 50%;
+  margin: 0 auto;
+  font-family: 'Roboto', sans-serif;
+  font-weight:100;
+  font-size: 17px;
+}
  
 .footer { 
   background-color: black; 
@@ -154,4 +168,29 @@
 
 .footer a:hover { 
   text-decoration: none; 
-} 
+}
+
+.carousel-img {
+  width: 100%;
+  min-height: 650px;
+  max-height: 650px
+}
+
+.intro-title {
+  color:white
+}
+
+.intro-desc {
+  color:white; 
+  font-family: 'Roboto', sans-serif;
+  font-size: 40px;
+  font-weight: 100;
+  letter-spacing: 3px;
+}
+
+.cat-header {
+  font-size: 56px;
+  font-family: 'Roboto',sans-serif;
+  font-style: italic;
+}
+

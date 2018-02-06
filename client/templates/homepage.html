@@ -3,10 +3,11 @@
     {{#if hasAdminAccess}}
     <div>
       {{> products}}
-    </div>gt {{else}}
+    </div>
+    gt {{else}}
     <div>
       {{> introTemplate}}
-      <div style="background-color: #f6f6f6">
+      <div class="product-section">
         <div class="container">
           <div class="row featured">
             <h1>Featured Products</h1>
@@ -14,7 +15,9 @@
           </div>
         </div>
       </div>
-      {{> categoryTemplate}} {{> aboutTemplate}} {{> footerTemplate}}
+      {{> categoryTemplate}}
+      {{> aboutTemplate}}
+      {{> footerTemplate}}
     </div>
     {{/if}}
   </main>
