@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { Reaction } from "/client/api";
 import ReactStars from "react-stars";
 import { Meteor } from "meteor/meteor";
-import { ReactionProduct } from "/lib/api";
-import { ProductReviews } from "/lib/collections";
+import { ShopReviews } from "/lib/collections";
 import { Card, CardHeader, CardBody, ReactionAvatar } from "/imports/plugins/core/ui/client/components";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
+import ShopRating from "./shopRating";
 
-class ProductReview extends Component {
+class ShopReview extends Component {
   static propTypes = {
     reviews: PropTypes.arrayOf(PropTypes.any)
   };
@@ -20,14 +21,15 @@ class ProductReview extends Component {
     };
   }
   createReview = () => {
+    const shopId = Reaction.getShopId();
     // eslint-disable-next-line
     const thisComponent = this;
     if (this.state.rating === 0) {
       Alerts.toast("Please add a rating to your review.", "error");
       return;
     }
-    Meteor.call("productReview/createReview",
-      ReactionProduct.selectedProductId(),
+    Meteor.call("shopReview/createReview",
+      shopId,
       this.state.review,
       this.state.rating,
       function (error) {
@@ -48,7 +50,7 @@ class ProductReview extends Component {
         <div className="media-left">
           <ReactionAvatar
             size={40}
-            className={"img-responsive review-avatar"}
+            className={"img-responsive "}
             email={this.state.user.emails[0].address}
             name={this.state.user.name}
             round
@@ -59,7 +61,11 @@ class ProductReview extends Component {
             <ReactStars
               edit={false}
               onChange={
-                rating => { this.setState({ rating }); }} count={5} size={18}
+                rating => {
+                  this.setState({ rating });
+                }}
+              count={5}
+              size={18}
               value={review.rating}
             />
           </h4>
@@ -71,9 +77,15 @@ class ProductReview extends Component {
     ));
     return (
       <div className="view-review-container">
-        <Card>
-          <CardHeader i18nKeyTitle={"Product reviews"} title={"Product reviews"} />
+        <h2 className="text-center shop-name">{Reaction.getShopName()}</h2>
+        <Card className="col-md-3 col-md-offset-2" >
           <CardBody>
+            <ShopRating />
+          </CardBody>
+        </Card>
+        <Card className="col-md-5 col-md-offset-1">
+          <CardHeader i18nKeyTitle={"Shop reviews"} title={"Shop Reviews"} />
+          <CardBody >
             {
               this.state.user.emails.length > 0 &&
 
@@ -95,9 +107,7 @@ class ProductReview extends Component {
                           rating => {
                             this.setState({ rating });
                           }}
-                        count={5}
-                        size={18}
-                        value={this.state.rating}
+                        count={5} size={18} value={this.state.rating}
                       />
                     </h4>
                     <textarea placeholder="Leave a review ..." cols="2" rows="2"
@@ -135,23 +145,23 @@ class ProductReview extends Component {
     );
   }
 }
-ProductReview.propTypes = {
+ShopReview.propTypes = {
   reviews: PropTypes.arrayOf(PropTypes.shape({
     review: PropTypes.string
   }))
 };
 
-ProductReview.defaultProps = {
+ShopReview.defaultProps = {
   reviews: []
 };
-function composer(props, productData) {
-  productData(null, {
-    reviews: ProductReviews.find(
-      { productId: ReactionProduct.selectedProductId() },
-      { sort: { createdAt: -1 }, limit: 20 }).fetch()
+function composer(props, shopData) {
+  const shopId = Reaction.Router.getQueryParam("_");
+  shopData(null, {
+    reviews: ShopReviews.find(
+      { shopId }, { sort: { createdAt: -1 }, limit: 20 }).fetch()
   });
 }
 
-registerComponent("ProductReview", ProductReview);
+registerComponent("ShopReview", ShopReview);
 
-export default composeWithTracker(composer)(ProductReview);
+export default composeWithTracker(composer)(ShopReview);

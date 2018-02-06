@@ -55,6 +55,8 @@ Subscriptions.Media = Subscriptions.Manager.subscribe("Media");
 
 Subscriptions.ProductReview = Subscriptions.Manager.subscribe("ProductReviews");
 
+Subscriptions.ShopReviews = Subscriptions.Manager.subscribe("ShopReviews");
+
 /**
  * Subscriptions that need to reload on new sessions
  */
