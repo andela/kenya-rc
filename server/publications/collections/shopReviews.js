@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
-import { ShopReviews } from "/lib/collections";
+import { Reviews } from "/lib/collections";
 
-Meteor.publish("ShopReviews", () => {
-  return ShopReviews.find();
+Meteor.publish("Reviews", () => {
+  return Reviews.find();
 });

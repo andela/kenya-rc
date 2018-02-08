@@ -53,9 +53,7 @@ Subscriptions.Groups = Subscriptions.Manager.subscribe("Groups");
 
 Subscriptions.Media = Subscriptions.Manager.subscribe("Media");
 
-Subscriptions.ProductReview = Subscriptions.Manager.subscribe("ProductReviews");
-
-Subscriptions.ShopReviews = Subscriptions.Manager.subscribe("ShopReviews");
+Subscriptions.Reviews = Subscriptions.Manager.subscribe("Reviews");
 
 /**
  * Subscriptions that need to reload on new sessions

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Reaction } from "/client/api";
 import ReactStars from "react-stars";
 import { Meteor } from "meteor/meteor";
-import { ShopReviews } from "/lib/collections";
+import { Reviews } from "/lib/collections";
 import { Card, CardHeader, CardBody, ReactionAvatar } from "/imports/plugins/core/ui/client/components";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
 import ShopRating from "./shopRating";
@@ -157,7 +157,7 @@ ShopReview.defaultProps = {
 function composer(props, shopData) {
   const shopId = Reaction.Router.getQueryParam("_");
   shopData(null, {
-    reviews: ShopReviews.find(
+    reviews: Reviews.find(
       { shopId }, { sort: { createdAt: -1 }, limit: 20 }).fetch()
   });
 }

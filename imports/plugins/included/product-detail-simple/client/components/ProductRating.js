@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { ReactionProduct } from "/lib/api";
-import { ProductReviews } from "/lib/collections";
+import { Reviews } from "/lib/collections";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
 import { Card, CardBody } from "/imports/plugins/core/ui/client/components";
 
@@ -25,7 +25,7 @@ class ProductRating extends Component {
                 RATING
               </h4></span>
               <span><h1 className="text-center average-rating">
-                { productAverageRating }
+                {productAverageRating}
               </h1></span>
               <small className="text-muted"> Rated by {reviews.length} customer(s)</small>
             </div>
@@ -46,14 +46,11 @@ ProductRating.defaultProps = {
   reviews: []
 };
 const composer = (props, productData) => {
+  const productId = ReactionProduct.selectedProductId();
   productData(null, {
-    reviews: ProductReviews.find({
-      productId: ReactionProduct.selectedProductId()
-    }, {
-      sort: {
-        createdAt: -1
-      }
-    }).fetch()
+    reviews: Reviews.find(
+      { productId },
+      { sort: { createdAt: -1 }, limit: 20 }).fetch()
   });
 };
 

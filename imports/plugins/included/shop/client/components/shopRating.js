@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Reaction } from "/client/api";
-import { ShopReviews } from "/lib/collections";
+import { Reviews } from "/lib/collections";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
 
 class ShopRating extends Component {
@@ -40,7 +40,7 @@ ShopRating.defaultProps = {
 const composer = (props, shopData) => {
   const shopId = Reaction.Router.getQueryParam("_");
   shopData(null, {
-    reviews: ShopReviews.find({
+    reviews: Reviews.find({
       shopId
     }, {
       sort: {

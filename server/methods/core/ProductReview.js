@@ -1,7 +1,7 @@
 import { check } from "meteor/check";
 import { Meteor } from "meteor/meteor";
 import { Reaction } from "/server/api";
-import { ProductReviews } from "/lib/collections";
+import { Reviews } from "/lib/collections";
 
 /**
  * @method checkUserPermissions
@@ -25,7 +25,7 @@ Meteor.methods({
       throw new Meteor.Error(403, "Owners, admins, and unauthenticated users can't review products.");
     }
 
-    ProductReviews.insert({
+    Reviews.insert({
       userId: Meteor.user()._id,  productId,  review, rating: parseInt(rating, 10)
     });
   }

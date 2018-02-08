@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ReactStars from "react-stars";
+import { Reaction } from "/client/api";
 import { Meteor } from "meteor/meteor";
 import { ReactionProduct } from "/lib/api";
-import { ProductReviews } from "/lib/collections";
+import { Reviews } from "/lib/collections";
 import { Card, CardHeader, CardBody, ReactionAvatar } from "/imports/plugins/core/ui/client/components";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
 
@@ -20,6 +21,7 @@ class ProductReview extends Component {
     };
   }
   createReview = () => {
+    const productId = ReactionProduct.selectedProductId();
     // eslint-disable-next-line
     const thisComponent = this;
     if (this.state.rating === 0) {
@@ -27,12 +29,12 @@ class ProductReview extends Component {
       return;
     }
     Meteor.call("productReview/createReview",
-      ReactionProduct.selectedProductId(),
+      productId,
       this.state.review,
       this.state.rating,
       function (error) {
         if (error) {
-        // Alert to the user that something went wrong.
+          // Alert to the user that something went wrong.
           Alerts.toast(error.reason, "error");
         } else {
           thisComponent.setState({ review: "", rating: 0 });
@@ -145,9 +147,10 @@ ProductReview.defaultProps = {
   reviews: []
 };
 function composer(props, productData) {
+  const productId = ReactionProduct.selectedProductId();
   productData(null, {
-    reviews: ProductReviews.find(
-      { productId: ReactionProduct.selectedProductId() },
+    reviews: Reviews.find(
+      { productId },
       { sort: { createdAt: -1 }, limit: 20 }).fetch()
   });
 }
