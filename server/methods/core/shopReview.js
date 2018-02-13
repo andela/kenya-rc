@@ -22,10 +22,19 @@ Meteor.methods({
     check(rating, Number);
 
     if (!canReview()) {
-      throw new Meteor.Error(403, "Owners, admins, and unauthenticated users can't review shops.");
+      throw new Meteor.Error(
+        403, "Owners, admins, and unauthenticated users can't review shops."
+      );
     }
+
+    const user = Meteor.user();
+
+    const userName = user.profile.addressBook ?
+      user.profile.addressBook.fullName : "";
+
     Reviews.insert({
-      userId: Meteor.user()._id, shopId,  review, rating: parseInt(rating, 10)
+      userId: user._id, shopId, email: user.emails[0].address, name: userName,
+      productId: null, review, rating: parseInt(rating, 10)
     });
   }
 });

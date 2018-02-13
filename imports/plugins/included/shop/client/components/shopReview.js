@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Reaction } from "/client/api";
-import ReactStars from "react-stars";
 import { Meteor } from "meteor/meteor";
 import { Reviews } from "/lib/collections";
-import { Card, CardHeader, CardBody, ReactionAvatar } from "/imports/plugins/core/ui/client/components";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
 import ShopRating from "./shopRating";
+import DisplayReviews from "./../../../product-detail-simple/client/components/displayReviews";
 
 class ShopReview extends Component {
   static propTypes = {
@@ -34,7 +33,7 @@ class ShopReview extends Component {
       this.state.rating,
       function (error) {
         if (error) {
-        // Alert to the user that something went wrong.
+          // Alert to the user that something went wrong.
           Alerts.toast(error.reason, "error");
         } else {
           thisComponent.setState({ review: "", rating: 0 });
@@ -43,104 +42,28 @@ class ShopReview extends Component {
         }
       });
   }
+
+  onRatingChange = rating => this.setState({ rating });
+
+  onInputChange = event =>
+    this.setState({ [event.target.name]: event.target.value });
+
   render() {
-    const { reviews } = this.props;
-    const reviewList = reviews.map(review => (
-      <div className="media" key={review._id}>
-        <div className="media-left">
-          <ReactionAvatar
-            size={40}
-            className={"img-responsive "}
-            email={this.state.user.emails[0].address}
-            name={this.state.user.name}
-            round
-          />
-        </div>
-        <div className="media-body">
-          <h4 className="media-heading">
-            <ReactStars
-              edit={false}
-              onChange={
-                rating => {
-                  this.setState({ rating });
-                }}
-              count={5}
-              size={18}
-              value={review.rating}
-            />
-          </h4>
-          <p>
-            {review.review}
-          </p>
-        </div>
-      </div>
-    ));
     return (
       <div className="view-review-container">
         <h2 className="text-center shop-name">{Reaction.getShopName()}</h2>
-        <Card className="col-md-3 col-md-offset-2" >
-          <CardBody>
-            <ShopRating />
-          </CardBody>
-        </Card>
-        <Card className="col-md-5 col-md-offset-1">
-          <CardHeader i18nKeyTitle={"Shop reviews"} title={"Shop Reviews"} />
-          <CardBody >
-            {
-              this.state.user.emails.length > 0 &&
-
-              <div className="row media-container">
-                <div className="media">
-                  <div className="media-left">
-                    <ReactionAvatar
-                      size={40}
-                      className={"img-responsive review-avatar"}
-                      email={this.state.user.emails[0].address}
-                      name={this.state.user.name}
-                      round
-                    />
-                  </div>
-                  <div className="media-body">
-                    <h4 className="media-heading">
-                      <ReactStars
-                        onChange={
-                          rating => {
-                            this.setState({ rating });
-                          }}
-                        count={5} size={18} value={this.state.rating}
-                      />
-                    </h4>
-                    <textarea placeholder="Leave a review ..." cols="2" rows="2"
-                      className="form-control review-text"
-                      value={this.state.review}
-                      name="review"
-                      onChange={
-                        event => {
-                          this.setState({
-                            [event.target.name]: event.target.value
-                          });
-                        }}
-                    />
-                    <div className="add-to-cart">
-                      <button
-                        className="btn pull-right cart-button"
-                        onClick={this.createReview}
-                        disabled={this.state.review.length < 8}
-                      >Submit review</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            }
-            {
-              this.state.user.emails.length < 1 &&
-              <p className="text-center">Please sign in to add a review</p>
-            }
-            <div className="review-container">
-              {reviewList}
-            </div>
-          </CardBody>
-        </Card>
+        <ShopRating />
+        <DisplayReviews
+          containerClasses="col-md-5 col-md-offset-1"
+          reviews={this.props.reviews}
+          onRatingChange={this.onRatingChange}
+          user={this.state.user}
+          createReview={this.createReview}
+          review={this.state.review}
+          onInputChange={this.onInputChange}
+          reviewType="Shop"
+          rating={this.state.rating}
+        />
       </div>
     );
   }
@@ -158,7 +81,7 @@ function composer(props, shopData) {
   const shopId = Reaction.Router.getQueryParam("_");
   shopData(null, {
     reviews: Reviews.find(
-      { shopId }, { sort: { createdAt: -1 }, limit: 20 }).fetch()
+      { shopId }, { sort: { createdAt: -1 }, limit: 1000 }).fetch()
   });
 }
 

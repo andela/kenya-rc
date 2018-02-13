@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { ReactionProduct } from "/lib/api";
 import { Reviews } from "/lib/collections";
+import DisplayRating from "./displayRating";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
-import { Card, CardBody } from "/imports/plugins/core/ui/client/components";
 
 class ProductRating extends Component {
   static PropTypes = {
@@ -11,26 +11,12 @@ class ProductRating extends Component {
   };
 
   render() {
-    const { reviews } = this.props;
-    const totalRatings = reviews.map(review => review.rating)
-      .reduce((total, rating) => total + rating, 0);
-    const reviewCount = reviews.length;
-    const productAverageRating = reviewCount ? Math.floor((totalRatings / reviewCount) * 100) / 100 : 0;
     return (
       <div>
-        <Card className="col-md-4 col-md-offset-4 product-rating-card">
-          <CardBody>
-            <div className="text-center card-body">
-              <span><h4 className="text-center">
-                RATING
-              </h4></span>
-              <span><h1 className="text-center average-rating">
-                {productAverageRating}
-              </h1></span>
-              <small className="text-muted"> Rated by {reviews.length} customer(s)</small>
-            </div>
-          </CardBody>
-        </Card>
+        <DisplayRating
+          reviews={this.props.reviews}
+          containerClasses={"col-md-4 col-md-offset-4 product-rating-card"}
+        />
       </div>
     );
   }
@@ -50,7 +36,7 @@ const composer = (props, productData) => {
   productData(null, {
     reviews: Reviews.find(
       { productId },
-      { sort: { createdAt: -1 }, limit: 20 }).fetch()
+      { sort: { createdAt: -1 }, limit: 1000 }).fetch()
   });
 };
 

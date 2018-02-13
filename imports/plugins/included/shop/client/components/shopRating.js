@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Reaction } from "/client/api";
 import { Reviews } from "/lib/collections";
+import DisplayRating from "./../../../product-detail-simple/client/components/displayRating";
 import { registerComponent, composeWithTracker } from "@reactioncommerce/reaction-components";
 
 class ShopRating extends Component {
@@ -10,21 +11,11 @@ class ShopRating extends Component {
   };
 
   render() {
-    const { reviews } = this.props;
-    const totalRatings = reviews.map(review => review.rating)
-      .reduce((total, rating) => total + rating, 0);
-    const reviewCount = reviews.length;
-    const shopAverageRating = reviewCount ? Math.floor((totalRatings / reviewCount) * 100) / 100 : 0;
     return (
-      <div className="text-center card-body">
-        <span><h4 className="text-center">
-          RATING
-        </h4></span>
-        <span><h1 className="text-center average-rating">
-          { shopAverageRating }
-        </h1></span>
-        <small className="text-muted"> Rated by {reviews.length} customer(s)</small>
-      </div>
+      <DisplayRating
+        containerClasses="col-md-3 col-md-offset-2"
+        reviews={this.props.reviews}
+      />
     );
   }
 }
