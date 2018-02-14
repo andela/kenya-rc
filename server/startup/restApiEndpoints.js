@@ -1,12 +1,6 @@
 import collections from "../../lib/collections";
 import Reaction from "../../server/api/core";
 
-/**
- * @param {Object} user
- * @param {String} role
- * @returns {boolean}
- */
-
 // eslint-disable-next-line no-undef
 const Api = new Restivus({
   useDefaultAuth: true,
