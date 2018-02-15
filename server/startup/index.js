@@ -5,7 +5,7 @@ import Registry from "./registry";
 import Init from "./init";
 import Prerender from "./prerender";
 import { initTemplates } from "/server/api/core/templates";
-import restApi from "./restApiEndpoints";
+// import restApi from "./restApiEndpoints";
 
 
 export default function () {
@@ -16,5 +16,5 @@ export default function () {
   Registry();
   Init();
   Prerender();
-  restApi();
+  // restApi();
 }
