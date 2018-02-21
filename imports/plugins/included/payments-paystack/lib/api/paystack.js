@@ -1,18 +1,46 @@
 import { Meteor } from "meteor/meteor";
+import request from "request";
 import { Packages } from "/lib/collections";
 
-export const Paystack=                                                                                                                                                                                                                                                                                                                                                                                                          = {
+const paystackHeader = (secretKey) => {
+  return {
+    "Authorization": `Bearer ${secretKey}`,
+    "Content-Type": "application/json"
+  };
+};
+
+export const Paystack = {
   accountOptions: function () {
     const settings = Packages.findOne({
-      name: "reaction-paymentmethod"
+      name: "paystack-payment-method"
     }).settings;
-    if (!settings.apiKey) {
+    if (!settings.publicKey || !settings.secretKey) {
       throw new Meteor.Error("403", "Invalid Credentials");
     }
-    return settings.apiKey;
+    return {
+      publicKey: settings.publicKey,
+      secretKey: settings.secretKey
+    };
   },
 
   authorize: function (cardInfo, paymentInfo, callback) {
     Meteor.call("paystackSubmit", "authorize", cardInfo, paymentInfo, callback);
+  },
+
+  verify: (referenceNumber, secretKey, callback) => {
+    const referenceId = referenceNumber;
+    const headers = paystackHeader(secretKey);
+    const paystackUrl =
+    `https://api.paystack.co/transaction/verify/${referenceId}`;
+    request.get(paystackUrl, {
+      headers
+    }, (error, response, body) => {
+      const responseBody = JSON.parse(body);
+      if (responseBody.status) {
+        callback(null, responseBody);
+      } else {
+        callback(responseBody, null);
+      }
+    });
   }
 };

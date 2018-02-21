@@ -15,7 +15,7 @@ class ProductRating extends Component {
       <div>
         <DisplayRating
           reviews={this.props.reviews}
-          containerClasses={"col-md-4 col-md-offset-4 product-rating-card"}
+          containerClasses={"col-md-12 product-rating-card"}
         />
       </div>
     );

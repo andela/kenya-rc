@@ -16,13 +16,12 @@ const ThirdPartyAPI = {
       const results = {
         success: true,
         id: Random.id(),
-        cardNumber: cardData.number.slice(-4),
         amount: paymentData.total,
         currency: "USD"
       };
       // This is for testing risk evaluation. Proper payment methods have dectection mechanisms for this.
       // This is just a sample
-      if (cardData.number === RISKY_TEST_CARD) {
+      if (cardData === RISKY_TEST_CARD) {
         results.riskStatus = "highest_risk_level";
       }
       return results;
@@ -68,12 +67,8 @@ export const PaystackApi = {};
 PaystackApi.methods = {};
 
 export const cardSchema = new SimpleSchema({
-  number: { type: String },
   name: { type: String },
-  cvv2: { type: String },
-  expireMonth: { type: String },
-  expireYear: { type: String },
-  type: { type: String }
+  email: { type: String }
 });
 
 registerSchema("cardSchema", cardSchema);

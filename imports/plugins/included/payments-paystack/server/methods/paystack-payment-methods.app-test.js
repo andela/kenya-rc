@@ -29,11 +29,7 @@ describe("PaystackApi", function () {
   it("should return data from ThirdPartyAPI authorize", function () {
     const cardData = {
       name: "Test User",
-      number: "4242424242424242",
-      expireMonth: "2",
-      expireYear: "2018",
-      cvv2: "123",
-      type: "visa"
+      email: "test@test.com"
     };
     const paymentData = {
       currency: "USD",
@@ -52,11 +48,7 @@ describe("PaystackApi", function () {
   it("should return risk status for flagged test card", function () {
     const cardData = {
       name: "Test User",
-      number: RISKY_TEST_CARD,
-      expireMonth: "2",
-      expireYear: "2018",
-      cvv2: "123",
-      type: "visa"
+      email: "test@test.com"
     };
     const paymentData = {
       currency: "USD",
@@ -98,17 +90,10 @@ describe("Submit payment", function () {
   });
 
   it("should call Paystack API with card and payment data", function () {
-    // this is a ridiculous timeout for a test that should run in subseconds
-    // but a bug in the Meteor test runner (or something) seems to make this test stall
-    // it actually stalls after the entire test is completed
     this.timeout(30000);
     const cardData = {
       name: "Test User",
-      number: "4242424242424242",
-      expireMonth: "2",
-      expireYear: "2018",
-      cvv2: "123",
-      type: "visa"
+      email: "test@test.com"
     };
     const paymentData = {
       currency: "USD",
@@ -133,16 +118,13 @@ describe("Submit payment", function () {
   it("should throw an error if card data is not correct", function () {
     const badCardData = {
       name: "Test User",
-      cvv2: "123",
-      type: "visa"
+      email: "test@test.com"
     };
 
     const paymentData = {
       currency: "USD",
       total: "19.99"
     };
-
-    // Notice how you need to wrap this call in another function
     expect(function () {
       Meteor.call("paystackSubmit", "authorize", badCardData, paymentData);
     }

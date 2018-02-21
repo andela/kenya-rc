@@ -12,7 +12,8 @@ class PaystackSettingsFormContainer extends Component {
     super(props);
 
     this.state = {
-      apiKey: "278302390293"
+      publicKey: "",
+      secretKey: ""
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -22,18 +23,20 @@ class PaystackSettingsFormContainer extends Component {
 
   handleChange(event) {
     event.preventDefault();
-    this.setState({ apiKey: event.target.value });
+    this.setState({ [event.target.name]: event.target.value });
   }
 
   handleSubmit(settings) {
-    // e.preventDefault();
 
     const packageId = this.props.packageData._id;
     const settingsKey = this.props.packageData.registry[0].settingsKey;
 
     const fields = [{
-      property: "apiKey",
-      value: settings.apiKey
+      property: "publicKey",
+      value: settings.publicKey
+    }, {
+      property: "secretKey",
+      value: settings.secretKey
     }, {
       property: "support",
       value: settings.support
@@ -73,7 +76,7 @@ const composer = ({}, onData) => {
   const subscription = Meteor.subscribe("Packages", Reaction.getShopId());
   if (subscription.ready()) {
     const packageData = Packages.findOne({
-      name: "paystack-paymentmethod",
+      name: "paystack-payment-method",
       shopId: Reaction.getShopId()
     });
     onData(null, { packageData });
