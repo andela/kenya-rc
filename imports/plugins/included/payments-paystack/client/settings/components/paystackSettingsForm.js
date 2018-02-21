@@ -8,7 +8,8 @@ class PaystackSettingsForm extends Component {
     super(props);
     this.state = {
       settings: {
-        apiKey: props.settings.apiKey,
+        publicKey: props.settings.publicKey,
+        secretKey: props.settings.secretKey,
         support: props.settings.support
       },
       checkbox: {
@@ -53,17 +54,26 @@ class PaystackSettingsForm extends Component {
       <div>
         { !settings.apiKey &&
           <div className="alert alert-info">
-            <Translation defaultValue="Paystack Credentials" i18nKey="admin.paymentSettings.paystackCredentials"/>
+            <Translation defaultValue="Paystack Credentials" 
+              i18nKey="admin.paymentSettings.paystackCredentials"
+            />
           </div>
         }
 
         <form onSubmit={this.handleSubmit}>
           <TextField
-            label="API Key"
-            name="apiKey"
+            label="Public Key"
+            name="publicKey"
             type="text"
             onChange={this.handleStateChange}
-            value={setting.apiKey}
+            value={setting.publicKey}
+          />
+          <TextField
+            label="Secret Key"
+            name="secretKey"
+            type="text"
+            onChange={this.handleStateChange}
+            value={setting.secretKey}
           />
 
           <label className="control-label">

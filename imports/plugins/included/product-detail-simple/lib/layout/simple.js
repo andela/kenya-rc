@@ -69,8 +69,6 @@ export default function blocks() {
         {
           component: "MediaGalleryContainer"
         },
-
-        // Tags
         {
           component: "ProductTags"
         },
@@ -78,6 +76,9 @@ export default function blocks() {
         // Metadata
         {
           component: "ProductMetadata"
+        },
+        {
+          component: "ProductRating"
         },
         {
           component: "ProductReview"
@@ -183,9 +184,7 @@ export default function blocks() {
             placement: "productDetail"
           }
         },
-        {
-          component: "ProductRating"
-        },
+        
 
         // Add to cart button
         {

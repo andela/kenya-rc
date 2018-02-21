@@ -8,9 +8,14 @@ export const PaystackPackageConfig = new SimpleSchema([
       type: Boolean,
       defaultValue: true
     },
-    "settings.apiKey": {
+    "settings.publicKey": {
       type: String,
-      label: "API Key",
+      label: "Public Key",
+      optional: true
+    },
+    "settings.secretKey": {
+      type: String,
+      label: "Secret Key",
       optional: true
     }
   }
@@ -19,30 +24,13 @@ export const PaystackPackageConfig = new SimpleSchema([
 registerSchema("PaystackPackageConfig", PaystackPackageConfig);
 
 export const PaystackPayment = new SimpleSchema({
-  payerName: {
+  name: {
     type: String,
-    label: "Cardholder name"
+    label: "Name"
   },
-  cardNumber: {
+  email: {
     type: String,
-    min: 13,
-    max: 16,
-    label: "Card number"
-  },
-  expireMonth: {
-    type: String,
-    max: 2,
-    label: "Expiration month"
-  },
-  expireYear: {
-    type: String,
-    max: 4,
-    label: "Expiration year"
-  },
-  cvv: {
-    type: String,
-    max: 4,
-    label: "CVV"
+    label: "Email Address"
   }
 });
 

@@ -1,1 +1,2 @@
-export { default as PaystackSettingsFormContainer } from "./paystackSettingsFormContainer";
+export { default as PaystackSettingsFormContainer } from
+  "./paystackSettingsFormContainer";
