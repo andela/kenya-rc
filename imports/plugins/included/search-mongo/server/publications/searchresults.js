@@ -9,15 +9,20 @@ import { ProductSearch, OrderSearch, AccountSearch } from "/lib/collections";
 const supportedCollections = ["products", "orders", "accounts"];
 
 function getProductFindTerm(searchTerm, searchTags, userId) {
-  const shopId = Reaction.getShopId();
+  const shopIds = Reaction.getShopId();
   const findTerm = {
-    shopId: shopId,
-    $text: { $search: searchTerm }
+    $and: [
+      { shopId: shopIds },
+      { title: {
+        $regex: searchTerm,
+        $options: "i"
+      } }
+    ]
   };
   if (searchTags.length) {
     findTerm.hashtags = { $all: searchTags };
   }
-  if (!Roles.userIsInRole(userId, ["admin", "owner"], shopId)) {
+  if (!Roles.userIsInRole(userId, ["admin", "owner"], shopIds)) {
     findTerm.isVisible = true;
   }
   return findTerm;
