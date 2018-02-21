@@ -183,6 +183,9 @@ export default function blocks() {
             placement: "productDetail"
           }
         },
+        {
+          component: "ProductRating"
+        },
 
         // Add to cart button
         {
@@ -192,9 +195,6 @@ export default function blocks() {
               paddingTop: 20
             }
           }
-        },
-        {
-          component: "ProductRating"
         }
 
       ]
