@@ -60,3 +60,5 @@ import "./templates/updatePassword/updatePassword.html";
 import "./templates/updatePassword/updatePassword.js";
 import "./templates/verify/verifyAccount.html";
 import "./templates/verify/verifyAccount.js";
+import "./templates/wallet/wallet.html";
+import "./templates/wallet/wallet.js";
