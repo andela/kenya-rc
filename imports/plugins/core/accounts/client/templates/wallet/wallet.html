@@ -1,0 +1,24 @@
+<template name="wallet">
+  <div class="panel panel-default panel-address-book">
+    <div class="panel-heading">
+      <h2 class="panel-title">Wallet</h2>
+    </div>
+    
+    <div class="row address-book">
+      <div class="col-md-12 panel-control-bar">
+        <h4>Current Balance: {{formatPrice balance}}</h4>      
+      </div>
+      <div class="col-md-4 col-xs-12 panel-body">
+        <form id="deposit" class="form-inline">
+          <label class="mr-sm-2" for="inlineFormInputGroup">Deposit</label>
+          <div class="input-group input">
+            <input id="depositAmount" type="number" class="form-control input-success" placeholder="Amount" required>
+            <span class="input-group-btn">
+            <button class="form-control btn btn-primary" data-event-action="fund-wallet-click" type="submit">Fund Wallet</button>
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
