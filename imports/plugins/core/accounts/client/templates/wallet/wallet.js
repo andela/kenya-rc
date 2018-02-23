@@ -74,7 +74,7 @@ Template.wallet.events({
       const handler = PaystackPop.setup({
         key: keys.publicKey,
         email: userMail,
-        amount: amount * 36000,
+        amount: amount * 100,
         callback: (result) => {
           const type = "deposit";
           const transactionRef = result.reference;
@@ -99,7 +99,7 @@ Template.wallet.events({
                 };
                 if (type === "deposit") {
                   paystackMethod.transactions = {
-                    amount: (paystackResponse.amount / 360) / 100,
+                    amount: (paystackResponse.amount) / 100,
                     referenceId: paystackResponse.reference,
                     date: new Date(),
                     transactionType: "Credit"
