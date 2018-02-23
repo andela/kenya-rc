@@ -1,4 +1,5 @@
 import { Cart } from "/lib/collections";
+import { Meteor } from "meteor/meteor";
 import { Template } from "meteor/templating";
 
 /*
@@ -77,4 +78,13 @@ Template.registerHelper("cartPayerName", function () {
     const name = cart.billing[0].address.fullName;
     if (name.replace(/[a-zA-Z ]*/, "").length === 0) return name;
   }
+});
+
+/**
+ * cartPayerEmail
+ * @summary gets current cart billing address / payment email
+ * @return {String} returns billing email address
+ */
+Template.registerHelper("cartPayerEmail", function () {
+  return Meteor.user().emails[0].address;
 });

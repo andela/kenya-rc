@@ -5,14 +5,15 @@ import { Meteor } from "meteor/meteor";
 import { Packages } from "/lib/collections";
 import { TranslationProvider } from "/imports/plugins/core/ui/client/providers";
 import { Reaction, i18next } from "/client/api";
-import { ExampleSettingsForm } from "../components";
+import { PaystackSettingsForm } from "../components";
 
-class ExampleSettingsFormContainer extends Component {
+class PaystackSettingsFormContainer extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      apiKey: "278302390293"
+      publicKey: "",
+      secretKey: ""
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -20,18 +21,22 @@ class ExampleSettingsFormContainer extends Component {
     this.saveUpdate = this.saveUpdate.bind(this);
   }
 
-  handleChange(e) {
-    e.preventDefault();
-    this.setState({ apiKey: e.target.value });
+  handleChange(event) {
+    event.preventDefault();
+    this.setState({ [event.target.name]: event.target.value });
   }
 
   handleSubmit(settings) {
+
     const packageId = this.props.packageData._id;
     const settingsKey = this.props.packageData.registry[0].settingsKey;
 
     const fields = [{
-      property: "apiKey",
-      value: settings.apiKey
+      property: "publicKey",
+      value: settings.publicKey
+    }, {
+      property: "secretKey",
+      value: settings.secretKey
     }, {
       property: "support",
       value: settings.support
@@ -53,7 +58,7 @@ class ExampleSettingsFormContainer extends Component {
     const settingsKey = this.props.packageData.registry[0].settingsKey;
     return (
       <TranslationProvider>
-        <ExampleSettingsForm
+        <PaystackSettingsForm
           onChange={this.handleChange}
           onSubmit={this.handleSubmit}
           settings={this.props.packageData.settings[settingsKey]}
@@ -63,7 +68,7 @@ class ExampleSettingsFormContainer extends Component {
   }
 }
 
-ExampleSettingsFormContainer.propTypes = {
+PaystackSettingsFormContainer.propTypes = {
   packageData: PropTypes.object
 };
 
@@ -71,11 +76,11 @@ const composer = ({}, onData) => {
   const subscription = Meteor.subscribe("Packages", Reaction.getShopId());
   if (subscription.ready()) {
     const packageData = Packages.findOne({
-      name: "example-paymentmethod",
+      name: "paystack-payment-method",
       shopId: Reaction.getShopId()
     });
     onData(null, { packageData });
   }
 };
 
-export default composeWithTracker(composer)(ExampleSettingsFormContainer);
+export default composeWithTracker(composer)(PaystackSettingsFormContainer);
