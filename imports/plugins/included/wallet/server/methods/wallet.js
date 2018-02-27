@@ -139,6 +139,47 @@ Meteor.methods({
   "wallet/getWalletDetails": (userId) => {
     check(userId, String);
     return Wallets.find({ userId }).fetch();
+  },
+  "wallet/update-balance": async function (transaction) {
+    check(transaction, Object);
+    const {
+      amount,
+      to,
+      from,
+      transactionType
+    } = transaction;
+
+    const updateBalance = (currentBalance, updateAmount, ownerEmail) => {
+      try {
+        Wallets.update({ ownerEmail }, {
+          $set: {
+            balance: currentBalance + updateAmount
+          }
+        });
+        return "Success";
+      } catch (error) {
+        return "Error";
+      }
+    };
+
+    let updateResult;
+
+    if (to === from) {
+      const wallet = Wallets.findOne({ ownerEmail: from });
+      const currentBalance = wallet.balance;
+      updateResult = updateBalance(currentBalance, amount, from);
+    } else {
+      if (transactionType === "credit") {
+        const receiverWallet = Wallets.findOne({ ownerEmail: to });
+        const currentBalance = receiverWallet.balance;
+        updateResult = updateBalance(currentBalance, amount, to);
+      } else {
+        const senderWallet = Wallets.findOne({ ownerEmail: from });
+        const currentBalance = senderWallet.balance;
+        updateResult = updateBalance(currentBalance, -amount, from);
+      }
+    }
+    return updateResult;
   }
 });
 
