@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Components, registerComponent } from "@reactioncommerce/reaction-components";
+import { Card, CardBody } from "/imports/plugins/core/ui/client/components";
+import "./priceRange.less";
 
 class AddToCartButton extends Component {
   get hasVariants() {
@@ -14,25 +16,49 @@ class AddToCartButton extends Component {
   }
 
   render() {
+    const URL = window.location.href;
     if (this.hasVariants) {
       return (
-        <div className="pdp add-to-cart block">
-          <input
-            className="form-control input-md"
-            id="add-to-cart-quantity"
-            min="1"
-            name="addToCartQty"
-            onChange={this.handleCartQuantityChange}
-            type="number"
-            value={this.props.cartQuantity}
-          />
-          <button
-            className="input-group-addon add-to-cart-text js-add-to-cart"
-            data-i18n="productDetail.addToCart"
-            onClick={this.props.onClick || this.props.onAddToCart}
-          >
-            <Components.Translation defaultValue="Add to cart" i18nKey="productDetail.addToCart" />
-          </button>
+        <div className="row">
+          <div className="pdp add-to-cart block">
+            <input
+              className="form-control input-md"
+              id="add-to-cart-quantity"
+              min="1"
+              name="addToCartQty"
+              onChange={this.handleCartQuantityChange}
+              type="number"
+              value={this.props.cartQuantity}
+            />
+            <button
+              className="input-group-addon add-to-cart-text js-add-to-cart"
+              data-i18n="productDetail.addToCart"
+              onClick={this.props.onClick || this.props.onAddToCart}
+            >
+              <Components.Translation defaultValue="Add to cart" i18nKey="productDetail.addToCart" />
+            </button>
+          </div>
+          <Card className="col-md-12 product-rating-card">
+            <CardBody>
+              <div className="text-center card-body">
+                <span>
+                  <h4 className="text-center">
+                    Share on social media
+                  </h4>
+                </span>
+                <a className="fa fa-twitter"
+                  href={`https://twitter.com/intent/tweet?&url=${URL}&hashtags=KenyaRc`}
+                  data-size="large"
+                  target="_blank"
+                />
+                <a className="fa fa-facebook"
+                  href={`https://www.facebook.com/sharer/sharer.php?url=${URL}`}
+                  target="_blank"
+                  data-size="large"
+                />
+              </div>
+            </CardBody>
+          </Card>
         </div>
       );
     }
