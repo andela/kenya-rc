@@ -56,11 +56,7 @@ Template.wallet.events({
     const accountDetails = Accounts.find(Meteor.userId()).fetch();
     const userMail = accountDetails[0].emails[0].address;
     const amount = parseInt(document.getElementById("depositAmount").value, 10);
-    if (amount < 0) {
-      Alerts.toast("Amount to deposit cannot be negative", "error");
-      return false;
-    }
-    if (amount === 0 || amount === "") {
+    if (amount <= 0 || !amount) {
       Alerts.toast("Please enter a deposit amount greater than zero ", "error");
       return false;
     }

@@ -24,9 +24,8 @@ const paystackHeaders = secret => ({
  * @return {object} headers object
  */
 const verifyPayment = (reference, secretKey, callback) => {
-  const referenceId = reference;
   const headers = paystackHeaders(secretKey);
-  const url = `https://api.paystack.co/transaction/verify/${referenceId}`;
+  const url = `https://api.paystack.co/transaction/verify/${reference}`;
   request.get(url, { headers }, (err, response, body) => {
     const res = JSON.parse(body);
     if (res.status) {

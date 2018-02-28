@@ -68,12 +68,10 @@ function hidePaymentAlert() {
   * @returns {Object} alert object
   */
 function handleWalletSubmitError(error) {
-  const serverError = error !== null ? error.message : "undefined";
-  if (serverError) {
-    return paymentAlert(`Oops! ${serverError}`);
-  } else if (error) {
-    return paymentAlert(`Oops! ${error}`, null, 4);
+  if (error.message) {
+    return paymentAlert(`Oops! ${error.message}`);
   }
+  return paymentAlert("Oops! An error occured", null, 4);
 }
 
 Template.walletPaymentForm.helpers({

@@ -37,7 +37,7 @@ class WalletSettingsFormContainer extends Component {
     super(props);
 
     this.state = {
-      apiKey: "278302390293"
+      apiKey: ""
     };
 
     this.handleChange = this.handleChange.bind(this);
