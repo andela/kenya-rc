@@ -184,7 +184,7 @@ export default function blocks() {
             placement: "productDetail"
           }
         },
-        
+
 
         // Add to cart button
         {
