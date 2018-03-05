@@ -115,12 +115,12 @@ class CompletedOrder extends React.Component {
          {headerText}
          <div className="order-details-main" >
            <div className="order-details-content-title" >
-             <p>
-               <Components.Translation
-                 defaultValue="Your Items"
-                 i18nKey="cartCompleted.yourItems"
-               />
-             </p >
+             {/* <p> */}
+             <Components.Translation
+               defaultValue="Your Items"
+               i18nKey="cartCompleted.yourItems"
+             />
+             {/* </p > */}
            </div>
            {
              this.state.shops.map((shop) => {
@@ -162,40 +162,42 @@ class CompletedOrder extends React.Component {
                    />
                  </p>
                </div>
-               {this.state.orderSummary.shipping.map((shipment) => {
-                 if (shipment.address.fullName || shipment.address.address1) {
-                   return (
-                     <div
-                       className="order-details-info-box"
-                       key={shipment._id}
-                     >
+               {
+                 this.state.orderSummary.shipping.map((shipment) => {
+                   if (shipment.address.fullName || shipment.address.address1) {
+                     return (
                        <div
-                         className="order-details-info-box-content"
+                         className="order-details-info-box"
+                         key={shipment._id}
                        >
-                         <p>
-                           {shipment.address.fullName}
-                           <br />
-                           {shipment.address.address1}
-                           <br />
-                           {shipment.address.city},
-                           {shipment.address.region}
-                           {shipment.address.postal}
-                           {shipment.address.country}
-                         </p>
+                         <div
+                           className="order-details-info-box-content"
+                         >
+                           <p>
+                             {shipment.address.fullName}
+                             <br />
+                             {shipment.address.address1}
+                             <br />
+                             {shipment.address.city},
+                             {shipment.address.region}
+                             {shipment.address.postal}
+                             {shipment.address.country}
+                           </p>
+                         </div>
                        </div>
-                     </div>);
-                 }
-               })
+                     );
+                   }
+                 })
                }
              </div>
              <div className="payment-info" >
                <div className="order-details-content-title" >
-                 <p>
-                   <Components.Translation
-                     defaultValue="Payment Method"
-                     i18nKey="cartCompleted.paymentMethod"
-                   />
-                 </p >
+                 {/* <p> */}
+                 <Components.Translation
+                   defaultValue="Payment Method"
+                   i18nKey="cartCompleted.paymentMethod"
+                 />
+                 {/* </p > */}
                </div>
                {
                  this.state.paymentMethods.map(paymentMethod => (
@@ -222,7 +224,6 @@ class CompletedOrder extends React.Component {
            <div className="row">
              <div className="col-md-12">
                {
-
                  !this.state.isCancelled &&
                  (<CancelOrderButton isCancelled={this.state.isCancelled} cancelOrder={this.cancelOrder} order={this.state.order} />)
                }
@@ -243,4 +244,5 @@ CompletedOrder.propTypes = {
   paymentMethods: PropTypes.array,
   shops: PropTypes.array
 };
+
 export default CompletedOrder;
