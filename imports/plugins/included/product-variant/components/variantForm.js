@@ -4,6 +4,8 @@ import classnames from "classnames";
 import _ from "lodash";
 import Velocity from "velocity-animate";
 import "velocity-animate/velocity.ui";
+import axios from "axios";
+import Dropzone from "react-dropzone";
 import { Components } from "@reactioncommerce/reaction-components";
 import { formatPriceString } from "/client/api";
 
@@ -38,6 +40,15 @@ const fieldGroups = {
   inventoryPolicy: { group: "inventoryManagement" },
   lowInventoryWarningThreshold: { group: "inventoryManagement" }
 };
+const dropZoneStyle = {
+  backgroundColor: "#f2f2f2",
+  height: "100px",
+  width: "100%"
+};
+
+const changeFileStyle = {
+  border: "none"
+};
 
 class VariantForm extends Component {
   constructor(props) {
@@ -48,7 +59,10 @@ class VariantForm extends Component {
       variant: props.variant,
       inventoryPolicy: props.variant.inventoryPolicy,
       taxable: props.variant.taxable,
-      inventoryManagement: props.variant.inventoryManagement
+      inventoryManagement: props.variant.inventoryManagement,
+      isUploadingFile: false,
+      fileUploaded: false,
+      fileName: ""
     };
   }
 
@@ -197,345 +211,459 @@ class VariantForm extends Component {
     return this.state.expandedCard === groupName;
   }
 
-  renderTaxCodeField() {
-    if (this.props.isProviderEnabled()) {
-      return (
-        <Components.Select
-          clearable={false}
-          i18nKeyLabel="productVariant.taxCode"
-          i18nKeyPlaceholder="productVariant.selectTaxCode"
-          label="Tax Code"
-          name="taxCode"
-          ref="taxCodeInput"
-          options={this.props.fetchTaxCodes()}
-          onChange={this.handleSelectChange}
-          value={this.variant.taxCode}
-        />
-      );
-    }
-    return (
-      <Components.TextField
-        i18nKeyLabel="productVariant.taxCode"
-        i18nKeyPlaceholder="productVariant.selectTaxCode"
-        placeholder="Select Tax Code"
-        label="Tax Code"
-        name="taxCode"
-        ref="taxCodeInput"
-        value={this.variant.taxCode}
-        onBlur={this.handleFieldBlur}
-        onChange={this.handleFieldChange}
-        onReturnKeyDown={this.handleFieldBlur}
-        validation={this.props.validation}
-      />
-    );
-  }
+  handleDrop = files => {
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    formData.append("upload_preset", "vpex0zlc");
+    formData.append("api_key", "297581248268948");
 
-  renderArchiveButton() {
-    if (this.props.isDeleted) {
-      return (
-        <Components.Button
-          icon="refresh"
-          className="rui btn btn-default btn-restore-variant flat"
-          tooltip="Restore"
-          onClick={() => this.props.restoreVariant(this.variant)}
-        />
-      );
-    }
-    return (
-      <Components.Button
-        icon="archive"
-        className="rui btn btn-default btn-remove-variant flat"
-        tooltip="Archive"
-        onClick={() => this.props.removeVariant(this.variant)}
-      />
-    );
-  }
-
-  renderArchivedLabel() {
-    if (this.props.isDeleted) {
-      return (
-        <div className="panel-subheading">
-          <span className="badge badge-danger" data-i18n="app.archived">
-            <span>Archived</span>
-          </span>
-        </div>
-      );
-    }
-  }
-
-  renderInventoryPolicyField() {
-    if (this.props.hasChildVariants(this.variant)) {
-      return (
-        <div className="col-sm-12">
-          <Components.Switch
-            i18nKeyLabel="productVariant.inventoryPolicy"
-            i18nKeyOnLabel="productVariant.inventoryPolicy"
-            name="inventoryPolicy"
-            label={"Allow backorder"}
-            onLabel={"Allow backorder"}
-            checked={!this.state.inventoryPolicy}
-            onChange={this.handleInventoryPolicyChange}
-            validation={this.props.validation}
-            disabled={true}
-            helpText={"Backorder allowance is now controlled by options"}
-            i18nKeyHelpText={"admin.helpText.variantBackorderToggle"}
-            style={{ backgroundColor: "lightgrey", cursor: "not-allowed" }}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="col-sm-12">
-        <Components.Switch
-          i18nKeyLabel="productVariant.inventoryPolicy"
-          i18nKeyOnLabel="productVariant.inventoryPolicy"
-          name="inventoryPolicy"
-          label={"Allow backorder"}
-          onLabel={"Allow backorder"}
-          checked={!this.state.inventoryPolicy}
-          onChange={this.handleInventoryPolicyChange}
-          validation={this.props.validation}
-        />
-      </div>
-    );
-  }
-
-  renderQuantityField() {
-    if (this.props.hasChildVariants(this.variant)) {
-      return (
-        <div className="col-sm-6">
-          <Components.TextField
-            i18nKeyLabel="productVariant.inventoryQuantity"
-            i18nKeyPlaceholder="0"
-            placeholder="0"
-            label="Quantity"
-            name="inventoryQuantity"
-            ref="inventoryQuantityInput"
-            value={this.props.onUpdateQuantityField(this.variant)}
-            style={{ backgroundColor: "lightgrey", cursor: "not-allowed" }}
-            disabled={true}
-            helpText={"Variant inventory is now controlled by options"}
-            i18nKeyHelpText={"admin.helpText.variantInventoryQuantity"}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="col-sm-6">
-        <Components.TextField
-          i18nKeyLabel="productVariant.inventoryQuantity"
-          i18nKeyPlaceholder="0"
-          placeholder="0"
-          label="Quantity"
-          name="inventoryQuantity"
-          ref="inventoryQuantityInput"
-          value={this.variant.inventoryQuantity}
-          onChange={this.handleFieldChange}
-          onBlur={this.handleFieldBlur}
-          onReturnKeyDown={this.handleFieldBlur}
-          validation={this.props.validation}
-          helpText={"Option inventory"}
-          i18nKeyHelpText={"admin.helpText.optionInventoryQuantity"}
-        />
-      </div>
-    );
-  }
-
-  renderVariantFields() {
-    const cardName = `variant-${this.variant._id}`;
-
-    const classNames = classnames({
-      "variant-card": true,
-      "active": this.isExpanded(cardName)
+    this.setState({
+      isUploadingFile: true
     });
 
-    return (
-      <Components.CardGroup>
-        <Components.Card
-          className={classNames}
-          expandable={true}
-          expanded={this.isExpanded(cardName)}
-          name={cardName}
-          onExpand={this.handleCardExpand}
-        >
-          <Components.CardHeader
-            actAsExpander={true}
-            i18nKeyTitle="productDetailEdit.variantDetails"
-            title="Variant Details"
-            isValid={this.props.validation.isValid}
-          >
-            {this.renderArchivedLabel()}
-            <Components.Button
-              icon="files-o"
-              className="rui btn btn-default btn-clone-variant flat"
-              tooltip="Duplicate"
-              onClick={() => this.props.cloneVariant(this.variant)}
-            />
-            <Components.VisibilityButton
-              onClick={() => this.handleVariantVisibilityToggle(this.variant)}
-              bezelStyle="flat"
-              primary={false}
-              toggleOn={this.variant.isVisible}
-            />
-            {this.renderArchiveButton()}
-          </Components.CardHeader>
-          <Components.CardBody expandable={true}>
-            <Components.TextField
-              i18nKeyLabel="productVariant.title"
-              i18nKeyPlaceholder="productVariant.title"
-              placeholder="Label"
-              label="Label"
-              name="title"
-              ref="titleInput"
-              value={this.variant.title}
-              onBlur={this.handleFieldBlur}
-              onChange={this.handleFieldChange}
-              onReturnKeyDown={this.handleFieldBlur}
-              validation={this.props.validation}
-            />
+    return axios.post(
+      "https://api.cloudinary.com/v1_1/victoradukwu/auto/upload", formData)
+      .then((response) => {
+        const secureUrl = response.data.secure_url;
+        const size = response.data.bytes;
+        const fileName = response.data.original_filename;
+        this.setState(({ variant }) => ({
+          variant: {
+            ...variant,
+            digitalFileDownloadLink: secureUrl,
+            digitalFileSize: size
+          },
+          isUploadingFile: false,
+          fileUploaded: true,
+          fileName
+        }), () => {
+          if (this.props.onVariantFieldSave) {
+            this.props.onVariantFieldSave(this.variant._id, "isDigital", true, this.state.variant);
+            this.props.onVariantFieldSave(this.variant._id, "digitalFileDownloadLink", secureUrl, this.state.variant);
+            this.props.onVariantFieldSave(this.variant._id, "digitalFileSize", size, this.state.variant);
+            this.props.onVariantFieldSave(this.variant._id, "inventoryManagement", false, this.state.variant);
+            this.props.onVariantFieldSave(this.variant._id, "isSoldOut", false, this.state.variant);
+            this.props.onVariantFieldSave(this.variant._id, "isLowQuantity", false, this.state.variant);
+            Alerts.toast("File uploaded successfully.", "success");
+          }
+        });
+      })
+      .catch(() => Alerts.toast("Error uploading file, Please try again", "error"));
+  }
+
+      handleChangeFile = files => {
+        this.setState({
+          isUploadingFile: true,
+          fileName: ""
+        });
+
+        this.handleDrop(files);
+      }
+
+
+      renderTaxCodeField() {
+        if (this.props.isProviderEnabled()) {
+          return (
             <Components.Select
               clearable={false}
-              i18nKeyLabel="productVariant.originCountry"
-              i18nKeyPlaceholder="productVariant.originCountry"
-              label="Origin Country"
-              name="originCountry"
-              ref="countryOfOriginInput"
-              options={this.props.countries}
+              i18nKeyLabel="productVariant.taxCode"
+              i18nKeyPlaceholder="productVariant.selectTaxCode"
+              label="Tax Code"
+              name="taxCode"
+              ref="taxCodeInput"
+              options={this.props.fetchTaxCodes()}
               onChange={this.handleSelectChange}
-              value={this.variant.originCountry}
+              value={this.variant.taxCode}
             />
-            <div className="row">
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.price"
-                  i18nKeyPlaceholder={formatPriceString("0.00")}
-                  placeholder={formatPriceString("0.00")}
-                  label="Price"
-                  name="price"
-                  ref="priceInput"
-                  value={this.variant.price}
-                  style={this.props.greyDisabledFields(this.variant)}
-                  disabled={this.props.hasChildVariants(this.variant)}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.compareAtPrice"
-                  i18nKeyPlaceholder={formatPriceString("0.00")}
-                  placeholder={formatPriceString("0.00")}
-                  label="Compare At Price"
-                  name="compareAtPrice"
-                  ref="compareAtPriceInput"
-                  value={this.variant.compareAtPrice}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-            </div>
-            <Components.Divider />
-            <div className="row">
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.width"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Width"
-                  name="width"
-                  ref="widthInput"
-                  value={this.variant.width}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.length"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Length"
-                  name="length"
-                  ref="lengthInput"
-                  value={this.variant.length}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.height"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Height"
-                  name="height"
-                  ref="heightInput"
-                  value={this.variant.height}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.weight"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Weight"
-                  name="weight"
-                  ref="weightInput"
-                  value={this.variant.weight}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-            </div>
-          </Components.CardBody>
-        </Components.Card>
-
-        <Components.SettingsCard
-          enabled={this.state.taxable}
-          expandable={true}
-          i18nKeyTitle="productVariant.taxable"
-          name="taxable"
-          packageName={"reaction-product-variant"}
-          saveOpenStateToPreferences={true}
-          showSwitch={true}
-          title="Taxable"
-          onSwitchChange={this.handleCheckboxChange}
-        >
-          {this.renderTaxCodeField()}
+          );
+        }
+        return (
           <Components.TextField
-            i18nKeyLabel="productVariant.taxDescription"
-            i18nKeyPlaceholder="productVariant.taxDescription"
-            placeholder="Tax Description"
-            label="Tax Description"
-            name="taxDescription"
-            ref="taxDescriptionInput"
-            value={this.variant.taxDescription}
+            i18nKeyLabel="productVariant.taxCode"
+            i18nKeyPlaceholder="productVariant.selectTaxCode"
+            placeholder="Select Tax Code"
+            label="Tax Code"
+            name="taxCode"
+            ref="taxCodeInput"
+            value={this.variant.taxCode}
             onBlur={this.handleFieldBlur}
             onChange={this.handleFieldChange}
             onReturnKeyDown={this.handleFieldBlur}
             validation={this.props.validation}
           />
-        </Components.SettingsCard>
+        );
+      }
 
+      renderArchiveButton() {
+        if (this.props.isDeleted) {
+          return (
+            <Components.Button
+              icon="refresh"
+              className="rui btn btn-default btn-restore-variant flat"
+              tooltip="Restore"
+              onClick={() => this.props.restoreVariant(this.variant)}
+            />
+          );
+        }
+        return (
+          <Components.Button
+            icon="archive"
+            className="rui btn btn-default btn-remove-variant flat"
+            tooltip="Archive"
+            onClick={() => this.props.removeVariant(this.variant)}
+          />
+        );
+      }
+
+      renderArchivedLabel() {
+        if (this.props.isDeleted) {
+          return (
+            <div className="panel-subheading">
+              <span className="badge badge-danger" data-i18n="app.archived">
+                <span>Archived</span>
+              </span>
+            </div>
+          );
+        }
+      }
+
+      renderInventoryPolicyField() {
+        if (this.props.hasChildVariants(this.variant)) {
+          return (
+            <div className="col-sm-12">
+              <Components.Switch
+                i18nKeyLabel="productVariant.inventoryPolicy"
+                i18nKeyOnLabel="productVariant.inventoryPolicy"
+                name="inventoryPolicy"
+                label={"Allow backorder"}
+                onLabel={"Allow backorder"}
+                checked={!this.state.inventoryPolicy}
+                onChange={this.handleInventoryPolicyChange}
+                validation={this.props.validation}
+                disabled={true}
+                helpText={"Backorder allowance is now controlled by options"}
+                i18nKeyHelpText={"admin.helpText.variantBackorderToggle"}
+                style={{ backgroundColor: "lightgrey", cursor: "not-allowed" }}
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="col-sm-12">
+            <Components.Switch
+              i18nKeyLabel="productVariant.inventoryPolicy"
+              i18nKeyOnLabel="productVariant.inventoryPolicy"
+              name="inventoryPolicy"
+              label={"Allow backorder"}
+              onLabel={"Allow backorder"}
+              checked={!this.state.inventoryPolicy}
+              onChange={this.handleInventoryPolicyChange}
+              validation={this.props.validation}
+            />
+          </div>
+        );
+      }
+
+      renderQuantityField() {
+        if (this.props.hasChildVariants(this.variant)) {
+          return (
+            <div className="col-sm-6">
+              <Components.TextField
+                i18nKeyLabel="productVariant.inventoryQuantity"
+                i18nKeyPlaceholder="0"
+                placeholder="0"
+                label="Quantity"
+                name="inventoryQuantity"
+                ref="inventoryQuantityInput"
+                value={this.props.onUpdateQuantityField(this.variant)}
+                style={{ backgroundColor: "lightgrey", cursor: "not-allowed" }}
+                disabled={true}
+                helpText={"Variant inventory is now controlled by options"}
+                i18nKeyHelpText={"admin.helpText.variantInventoryQuantity"}
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="col-sm-6">
+            <Components.TextField
+              i18nKeyLabel="productVariant.inventoryQuantity"
+              i18nKeyPlaceholder="0"
+              placeholder="0"
+              label="Quantity"
+              name="inventoryQuantity"
+              ref="inventoryQuantityInput"
+              value={this.variant.inventoryQuantity}
+              onChange={this.handleFieldChange}
+              onBlur={this.handleFieldBlur}
+              onReturnKeyDown={this.handleFieldBlur}
+              validation={this.props.validation}
+              helpText={"Option inventory"}
+              i18nKeyHelpText={"admin.helpText.optionInventoryQuantity"}
+            />
+          </div>
+        );
+      }
+      renderDropzone() {
+        return (
+          <Dropzone
+            multiple={false}
+            onDrop={this.handleDrop}
+            style={dropZoneStyle}
+          >
+            {!this.state.isUploadingFile &&
+             <div className="text-center add">
+               <p className="pt-10">Drop files here or click here to upload</p>
+               <i className="fa fa-plus fa-2x" aria-hidden="true" />
+             </div>}
+            {this.state.isUploadingFile &&
+             <div className="text-center">
+               <p className="pt-30">
+                 <i className="fa fa-spinner fa-spin fa-2x" />
+               </p>
+             </div>}
+          </Dropzone>
+        );
+      }
+
+      renderUploadedFile() {
+        return (
+          <div>
+            <p className="thumbnail">
+              {this.state.fileName}
+            </p>
+            <Dropzone
+              multiple={false}
+              onDrop={this.handleChangeFile}
+              style={changeFileStyle}
+            >
+              <div className="rui items flex">
+                <div className="rui item full justify center">
+                  <Components.IconButton
+                    icon="fa fa-pencil"
+                    tooltip="Change file"
+                    primary={true}
+                  />
+                </div>
+              </div>
+            </Dropzone>
+          </div>
+        );
+      }
+
+      renderVariantFields() {
+        const cardName = `variant-${this.variant._id}`;
+
+        const classNames = classnames({
+          "variant-card": true,
+          "active": this.isExpanded(cardName)
+        });
+
+        return (
+          <Components.CardGroup>
+            <Components.Card
+              className={classNames}
+              expandable={true}
+              expanded={this.isExpanded(cardName)}
+              name={cardName}
+              onExpand={this.handleCardExpand}
+            >
+              <Components.CardHeader
+                actAsExpander={true}
+                i18nKeyTitle="productDetailEdit.variantDetails"
+                title="Variant Details"
+                isValid={this.props.validation.isValid}
+              >
+                {this.renderArchivedLabel()}
+                <Components.Button
+                  icon="files-o"
+                  className="rui btn btn-default btn-clone-variant flat"
+                  tooltip="Duplicate"
+                  onClick={() => this.props.cloneVariant(this.variant)}
+                />
+                <Components.VisibilityButton
+                  onClick={() => this.handleVariantVisibilityToggle(this.variant)}
+                  bezelStyle="flat"
+                  primary={false}
+                  toggleOn={this.variant.isVisible}
+                />
+                {this.renderArchiveButton()}
+              </Components.CardHeader>
+              <Components.CardBody expandable={true}>
+                <Components.TextField
+                  i18nKeyLabel="productVariant.title"
+                  i18nKeyPlaceholder="productVariant.title"
+                  placeholder="Label"
+                  label="Label"
+                  name="title"
+                  ref="titleInput"
+                  value={this.variant.title}
+                  onBlur={this.handleFieldBlur}
+                  onChange={this.handleFieldChange}
+                  onReturnKeyDown={this.handleFieldBlur}
+                  validation={this.props.validation}
+                />
+                <Components.Select
+                  clearable={false}
+                  i18nKeyLabel="productVariant.originCountry"
+                  i18nKeyPlaceholder="productVariant.originCountry"
+                  label="Origin Country"
+                  name="originCountry"
+                  ref="countryOfOriginInput"
+                  options={this.props.countries}
+                  onChange={this.handleSelectChange}
+                  value={this.variant.originCountry}
+                />
+                <div className="row">
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.price"
+                      i18nKeyPlaceholder={formatPriceString("0.00")}
+                      placeholder={formatPriceString("0.00")}
+                      label="Price"
+                      name="price"
+                      ref="priceInput"
+                      value={this.variant.price}
+                      style={this.props.greyDisabledFields(this.variant)}
+                      disabled={this.props.hasChildVariants(this.variant)}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                    />
+                  </div>
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.compareAtPrice"
+                      i18nKeyPlaceholder={formatPriceString("0.00")}
+                      placeholder={formatPriceString("0.00")}
+                      label="Compare At Price"
+                      name="compareAtPrice"
+                      ref="compareAtPriceInput"
+                      value={this.variant.compareAtPrice}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                    />
+                  </div>
+                </div>
+                <Components.Divider />
+                {!this.props.currentProduct.isDigital &&
+              <div className="row">
+                <div className="col-sm-6">
+                  <Components.TextField
+                    i18nKeyLabel="productVariant.width"
+                    i18nKeyPlaceholder="0"
+                    placeholder="0"
+                    label="Width"
+                    name="width"
+                    ref="widthInput"
+                    value={this.variant.width}
+                    onBlur={this.handleFieldBlur}
+                    onChange={this.handleFieldChange}
+                    onReturnKeyDown={this.handleFieldBlur}
+                    validation={this.props.validation}
+                  />
+                </div>
+                <div className="col-sm-6">
+                  <Components.TextField
+                    i18nKeyLabel="productVariant.length"
+                    i18nKeyPlaceholder="0"
+                    placeholder="0"
+                    label="Length"
+                    name="length"
+                    ref="lengthInput"
+                    value={this.variant.length}
+                    onBlur={this.handleFieldBlur}
+                    onChange={this.handleFieldChange}
+                    onReturnKeyDown={this.handleFieldBlur}
+                    validation={this.props.validation}
+                  />
+                </div>
+              </div>}
+
+                {!this.props.currentProduct.isDigital &&
+              <div className="row">
+                <div className="col-sm-6">
+                  <Components.TextField
+                    i18nKeyLabel="productVariant.height"
+                    i18nKeyPlaceholder="0"
+                    placeholder="0"
+                    label="Height"
+                    name="height"
+                    ref="heightInput"
+                    value={this.variant.height}
+                    onBlur={this.handleFieldBlur}
+                    onChange={this.handleFieldChange}
+                    onReturnKeyDown={this.handleFieldBlur}
+                    validation={this.props.validation}
+                  />
+                </div>
+                <div className="col-sm-6">
+                  <Components.TextField
+                    i18nKeyLabel="productVariant.weight"
+                    i18nKeyPlaceholder="0"
+                    placeholder="0"
+                    label="Weight"
+                    name="weight"
+                    ref="weightInput"
+                    value={this.variant.weight}
+                    onBlur={this.handleFieldBlur}
+                    onChange={this.handleFieldChange}
+                    onReturnKeyDown={this.handleFieldBlur}
+                    validation={this.props.validation}
+                  />
+                </div>
+              </div>}
+
+                {this.props.currentProduct.isDigital &&
+              <div className="row">
+                {this.state.fileName === "" &&
+                  <div>
+                    {this.renderDropzone()}
+                  </div>
+                }
+                {this.state.fileName !== "" &&
+                  <div>
+                    {this.renderUploadedFile()}
+                  </div>
+                }
+              </div>}
+
+              </Components.CardBody>
+            </Components.Card>
+
+            <Components.SettingsCard
+              enabled={this.state.taxable}
+              expandable={true}
+              i18nKeyTitle="productVariant.taxable"
+              name="taxable"
+              packageName={"reaction-product-variant"}
+              saveOpenStateToPreferences={true}
+              showSwitch={true}
+              title="Taxable"
+              onSwitchChange={this.handleCheckboxChange}
+            >
+              {this.renderTaxCodeField()}
+              <Components.TextField
+                i18nKeyLabel="productVariant.taxDescription"
+                i18nKeyPlaceholder="productVariant.taxDescription"
+                placeholder="Tax Description"
+                label="Tax Description"
+                name="taxDescription"
+                ref="taxDescriptionInput"
+                value={this.variant.taxDescription}
+                onBlur={this.handleFieldBlur}
+                onChange={this.handleFieldChange}
+                onReturnKeyDown={this.handleFieldBlur}
+                validation={this.props.validation}
+              />
+            </Components.SettingsCard>
+
+            {!this.props.currentProduct.isDigital &&
         <Components.SettingsCard
           enabled={this.state.inventoryManagement}
           expandable={true}
@@ -564,217 +692,219 @@ class VariantForm extends Component {
                 validation={this.props.validation}
               />
             </div>
+
           </div>
           <div className="row">
             {this.renderInventoryPolicyField()}
           </div>
-        </Components.SettingsCard>
-      </Components.CardGroup>
-    );
-  }
+        </Components.SettingsCard>}
+          </Components.CardGroup>
+        );
+      }
 
 
-  renderOptionFields() {
-    const cardName = `variant-${this.variant._id}`;
+      renderOptionFields() {
+        const cardName = `variant-${this.variant._id}`;
 
-    const classNames = classnames({
-      "variant-option-card": true,
-      "active": this.isExpanded(cardName)
-    });
+        const classNames = classnames({
+          "variant-option-card": true,
+          "active": this.isExpanded(cardName)
+        });
 
-    return (
-      <Components.CardGroup>
-        <Components.Card
-          className={classNames}
-          expandable={true}
-          expanded={this.isExpanded(cardName)}
-          name={cardName}
-          onExpand={this.handleCardExpand}
-        >
-          <Components.CardHeader
-            actAsExpander={true}
-            title={this.variant.optionTitle || "Label is required"}
-            isValid={this.props.validation.isValid}
-          >
-            {this.renderArchivedLabel()}
-            <Components.Button
-              icon="files-o"
-              className="rui btn btn-default btn-clone-variant flat"
-              tooltip="Duplicate"
-              onClick={() => this.props.cloneVariant(this.variant)}
-            />
-            <Components.VisibilityButton
-              onClick={() => this.handleVariantVisibilityToggle(this.variant)}
-              bezelStyle="flat"
-              primary={false}
-              toggleOn={this.variant.isVisible}
-            />
-            {this.renderArchiveButton()}
-          </Components.CardHeader>
-          <Components.CardBody expandable={true}>
-            <Components.TextField
-              i18nKeyLabel="productVariant.optionTitle"
-              i18nKeyPlaceholder="productVariant.optionTitle"
-              placeholder="optionTitle"
-              label="Short Label"
-              name="optionTitle"
-              ref="optionTitleInput"
-              value={this.variant.optionTitle}
-              onBlur={this.handleFieldBlur}
-              onChange={this.handleFieldChange}
-              onReturnKeyDown={this.handleFieldBlur}
-              validation={this.props.validation}
-              helpText={"Displayed on Product Detail Page"}
-              i18nKeyHelpText={"admin.helpText.optionTitle"}
-            />
-            <Components.TextField
-              i18nKeyLabel="productVariant.title"
-              i18nKeyPlaceholder="productVariant.title"
-              placeholder="Label"
-              label="Label"
-              name="title"
-              ref="titleInput"
-              value={this.variant.title}
-              onBlur={this.handleFieldBlur}
-              onChange={this.handleFieldChange}
-              onReturnKeyDown={this.handleFieldBlur}
-              validation={this.props.validation}
-              helpText={"Displayed in cart, checkout, and orders"}
-              i18nKeyHelpText={"admin.helpText.title"}
-            />
-            <div className="row">
-              <div className="col-sm-6">
+        return (
+          <Components.CardGroup>
+            <Components.Card
+              className={classNames}
+              expandable={true}
+              expanded={this.isExpanded(cardName)}
+              name={cardName}
+              onExpand={this.handleCardExpand}
+            >
+              <Components.CardHeader
+                actAsExpander={true}
+                title={this.variant.optionTitle || "Label is required"}
+                isValid={this.props.validation.isValid}
+              >
+                {this.renderArchivedLabel()}
+                <Components.Button
+                  icon="files-o"
+                  className="rui btn btn-default btn-clone-variant flat"
+                  tooltip="Duplicate"
+                  onClick={() => this.props.cloneVariant(this.variant)}
+                />
+                <Components.VisibilityButton
+                  onClick={() => this.handleVariantVisibilityToggle(this.variant)}
+                  bezelStyle="flat"
+                  primary={false}
+                  toggleOn={this.variant.isVisible}
+                />
+                {this.renderArchiveButton()}
+              </Components.CardHeader>
+              <Components.CardBody expandable={true}>
                 <Components.TextField
-                  i18nKeyLabel="productVariant.price"
-                  i18nKeyPlaceholder={formatPriceString("0.00")}
-                  placeholder={formatPriceString("0.00")}
-                  label="Price"
-                  name="price"
-                  ref="priceInput"
-                  value={this.variant.price}
-                  style={this.props.greyDisabledFields(this.variant)}
-                  disabled={this.props.hasChildVariants(this.variant)}
+                  i18nKeyLabel="productVariant.optionTitle"
+                  i18nKeyPlaceholder="productVariant.optionTitle"
+                  placeholder="optionTitle"
+                  label="Short Label"
+                  name="optionTitle"
+                  ref="optionTitleInput"
+                  value={this.variant.optionTitle}
                   onBlur={this.handleFieldBlur}
                   onChange={this.handleFieldChange}
                   onReturnKeyDown={this.handleFieldBlur}
                   validation={this.props.validation}
-                  helpText={"Purchase price"}
-                  i18nKeyHelpText={"admin.helpText.price"}
+                  helpText={"Displayed on Product Detail Page"}
+                  i18nKeyHelpText={"admin.helpText.optionTitle"}
                 />
-              </div>
-              <div className="col-sm-6">
                 <Components.TextField
-                  i18nKeyLabel="productVariant.compareAtPrice"
-                  i18nKeyPlaceholder={formatPriceString("0.00")}
-                  placeholder={formatPriceString("0.00")}
-                  label="Compare At Price"
-                  name="compareAtPrice"
-                  ref="compareAtPriceInput"
-                  value={this.variant.compareAtPrice}
+                  i18nKeyLabel="productVariant.title"
+                  i18nKeyPlaceholder="productVariant.title"
+                  placeholder="Label"
+                  label="Label"
+                  name="title"
+                  ref="titleInput"
+                  value={this.variant.title}
                   onBlur={this.handleFieldBlur}
                   onChange={this.handleFieldChange}
                   onReturnKeyDown={this.handleFieldBlur}
                   validation={this.props.validation}
-                  helpText={"Original price or MSRP"}
-                  i18nKeyHelpText={"admin.helpText.compareAtPrice"}
+                  helpText={"Displayed in cart, checkout, and orders"}
+                  i18nKeyHelpText={"admin.helpText.title"}
                 />
-              </div>
+                <div className="row">
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.price"
+                      i18nKeyPlaceholder={formatPriceString("0.00")}
+                      placeholder={formatPriceString("0.00")}
+                      label="Price"
+                      name="price"
+                      ref="priceInput"
+                      value={this.variant.price}
+                      style={this.props.greyDisabledFields(this.variant)}
+                      disabled={this.props.hasChildVariants(this.variant)}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                      helpText={"Purchase price"}
+                      i18nKeyHelpText={"admin.helpText.price"}
+                    />
+                  </div>
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.compareAtPrice"
+                      i18nKeyPlaceholder={formatPriceString("0.00")}
+                      placeholder={formatPriceString("0.00")}
+                      label="Compare At Price"
+                      name="compareAtPrice"
+                      ref="compareAtPriceInput"
+                      value={this.variant.compareAtPrice}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                      helpText={"Original price or MSRP"}
+                      i18nKeyHelpText={"admin.helpText.compareAtPrice"}
+                    />
+                  </div>
+                </div>
+
+                <div className="row">
+                  {this.renderQuantityField()}
+                  {this.renderInventoryPolicyField()}
+                </div>
+                <div className="row">
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.width"
+                      i18nKeyPlaceholder="0"
+                      placeholder="0"
+                      label="Width"
+                      name="width"
+                      ref="widthInput"
+                      value={this.variant.width}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                    />
+                  </div>
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.length"
+                      i18nKeyPlaceholder="0"
+                      placeholder="0"
+                      label="Length"
+                      name="length"
+                      ref="lengthInput"
+                      value={this.variant.length}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                    />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.height"
+                      i18nKeyPlaceholder="0"
+                      placeholder="0"
+                      label="Height"
+                      name="height"
+                      ref="heightInput"
+                      value={this.variant.height}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                    />
+                  </div>
+                  <div className="col-sm-6">
+                    <Components.TextField
+                      i18nKeyLabel="productVariant.weight"
+                      i18nKeyPlaceholder="0"
+                      placeholder="0"
+                      label="Weight"
+                      name="weight"
+                      ref="weightInput"
+                      value={this.variant.weight}
+                      onBlur={this.handleFieldBlur}
+                      onChange={this.handleFieldChange}
+                      onReturnKeyDown={this.handleFieldBlur}
+                      validation={this.props.validation}
+                    />
+                  </div>
+                </div>
+              </Components.CardBody>
+            </Components.Card>
+          </Components.CardGroup>
+        );
+      }
+
+      render() {
+        if (this.props.type === "option") {
+          return (
+            <div>
+              {this.renderOptionFields()}
             </div>
-
-            <div className="row">
-              {this.renderQuantityField()}
-              {this.renderInventoryPolicyField()}
-            </div>
-            <div className="row">
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.width"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Width"
-                  name="width"
-                  ref="widthInput"
-                  value={this.variant.width}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.length"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Length"
-                  name="length"
-                  ref="lengthInput"
-                  value={this.variant.length}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.height"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Height"
-                  name="height"
-                  ref="heightInput"
-                  value={this.variant.height}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-              <div className="col-sm-6">
-                <Components.TextField
-                  i18nKeyLabel="productVariant.weight"
-                  i18nKeyPlaceholder="0"
-                  placeholder="0"
-                  label="Weight"
-                  name="weight"
-                  ref="weightInput"
-                  value={this.variant.weight}
-                  onBlur={this.handleFieldBlur}
-                  onChange={this.handleFieldChange}
-                  onReturnKeyDown={this.handleFieldBlur}
-                  validation={this.props.validation}
-                />
-              </div>
-            </div>
-          </Components.CardBody>
-        </Components.Card>
-      </Components.CardGroup>
-    );
-  }
-
-  render() {
-    if (this.props.type === "option") {
-      return (
-        <div>
-          {this.renderOptionFields()}
-        </div>
-      );
-    }
-    return (
-      <div>
-        {this.renderVariantFields()}
-      </div>
-    );
-  }
+          );
+        }
+        return (
+          <div>
+            {this.renderVariantFields()}
+          </div>
+        );
+      }
 }
 
 VariantForm.propTypes = {
   cloneVariant: PropTypes.func,
   countries: PropTypes.arrayOf(PropTypes.object),
+  currentProduct: PropTypes.object,
   editFocus: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   fetchTaxCodes: PropTypes.func,
   greyDisabledFields: PropTypes.func,

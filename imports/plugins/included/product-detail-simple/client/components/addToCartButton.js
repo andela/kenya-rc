@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Components, registerComponent } from "@reactioncommerce/reaction-components";
+import { ReactionProduct } from "/lib/api";
 import { Card, CardBody } from "/imports/plugins/core/ui/client/components";
 import "./priceRange.less";
 
@@ -21,6 +22,7 @@ class AddToCartButton extends Component {
       return (
         <div className="row">
           <div className="pdp add-to-cart block">
+          {!ReactionProduct.selectedProduct().isDigital &&
             <input
               className="form-control input-md"
               id="add-to-cart-quantity"
@@ -30,6 +32,7 @@ class AddToCartButton extends Component {
               type="number"
               value={this.props.cartQuantity}
             />
+          }
             <button
               className="input-group-addon add-to-cart-text js-add-to-cart"
               data-i18n="productDetail.addToCart"

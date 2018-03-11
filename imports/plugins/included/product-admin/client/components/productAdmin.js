@@ -145,6 +145,9 @@ class ProductAdmin extends Component {
     if (this.props.onProductFieldSave) {
       this.props.onProductFieldSave(this.product._id, field, value);
     }
+    if (field === "isDigital") {
+      his.props.onProductFieldSave(this.product._id, "requiresShipping", !value);
+    }
   }
 
   handleToggleVisibility = () => {
@@ -243,6 +246,14 @@ class ProductAdmin extends Component {
               options={this.props.templates}
               placeholder="Select a template"
               value={this.product.template}
+            />
+            <Components.Select
+              clearable={false}
+              label="Type"
+              name="isDigital"
+              onChange={this.handleSelectChange}
+              value={this.product.isDigital}
+              options={this.props.productTypes}
             />
             <Components.TextField
               i18nKeyLabel="productDetailEdit.title"
@@ -366,7 +377,7 @@ class ProductAdmin extends Component {
             <Components.TextField
               i18nKeyLabel="productDetailEdit.googleplusMsg"
               i18nKeyPlaceholder="productDetailEdit.googleplusMsg"
-              label="Google+ Message"
+              label="Google Message"
               multiline={true}
               name="googleplusMsg"
               onBlur={this.handleFieldBlur}
@@ -441,6 +452,12 @@ ProductAdmin.propTypes = {
   onProductFieldSave: PropTypes.func,
   onRestoreProduct: PropTypes.func,
   product: PropTypes.object,
+  productTypes: PropTypes.arrayOf(
+    PropTypes.shape({
+    label: PropTypes.string,
+    value: PropTypes.any
+    })
+  ),
   revisonDocumentIds: PropTypes.arrayOf(PropTypes.string),
   templates: PropTypes.arrayOf(PropTypes.shape({
     label: PropTypes.string,
