@@ -28,7 +28,7 @@ client/plugins.styl
 client/plugins.scss
 server/plugins.js
 
-custom/client/*
+!custom/client/*
 !custom/client/.gitkeep
 
 custom/server/*
@@ -40,7 +40,8 @@ public/custom/*
 private/custom/*
 !private/custom/.gitkeep
 
-imports/plugins/custom/*
+!imports/plugins/custom/*
+!imports/plugins/custom/actionable-analytics
 !imports/plugins/custom/payments-paystack
 !imports/plugins/custom/.gitkeep
 
